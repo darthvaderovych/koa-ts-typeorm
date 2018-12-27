@@ -1,5 +1,4 @@
 import { ConnectionOptions } from 'typeorm';
-import userEntity from '../src/db/entity/User';
 
 const dbOpts:ConnectionOptions =  {
   type: 'postgres',
@@ -7,11 +6,11 @@ const dbOpts:ConnectionOptions =  {
   port: 5432,
   username: 'postgres',
   password: 'postgres',
-  database: 'testdb',
+  database: process.env.POSTGRES_DB || 'testdb',
   synchronize: true,
   logging: false,
   entities: [
-    userEntity,
+    'src/db/entity/**/*.ts',
   ],
 };
 
