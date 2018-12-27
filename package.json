@@ -1,0 +1,33 @@
+{
+   "name": "koa-server-task",
+   "version": "1.0.0",
+   "description": "",
+   "main": "index.js",
+   "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "ts-node src/server.ts"
+   },
+   "author": "",
+   "license": "ISC",
+   "devDependencies": {
+      "tslint-config-airbnb": "^5.11.1",
+      "prettier": "^1.15.3",
+      "tslint": "^5.12.0"
+   },
+   "dependencies": {
+      "@types/joi": "^14.0.1",
+      "@types/koa-bodyparser": "^4.2.1",
+      "@types/node": "^10.12.18",
+      "@types/koa": "^2.0.47",
+      "@types/koa-logger": "^3.1.1",
+      "@types/koa-router": "^7.0.35",
+      "koa-logger": "^3.2.0",
+      "joi": "^14.3.0",
+      "koa": "^2.6.2",
+      "koa-bodyparser": "^4.2.1",
+      "koa-router": "^7.4.0",
+      "pg": "^7.7.1",
+      "reflect-metadata": "^0.1.10",
+      "typeorm": "0.2.9"
+   }
+}
