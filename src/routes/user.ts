@@ -3,6 +3,7 @@ import * as Router from 'koa-router';
 import { getRepository, Repository } from 'typeorm';
 import userEntity from '../db/entity/User';
 import helpers from '../helpers';
+import * as isUUID from 'is-uuid';
 
 const routerOpts = {
   prefix: '/api/users',
@@ -42,6 +43,51 @@ router.post('/', async (ctx:Koa.Context) => {
     }
   } else {
     ctx.status = 400;
+  }
+});
+
+router.get('/:id', async (ctx:Koa.Context) => {
+  const id = ctx.params.id;
+
+  if (isUUID.anyNonNil(id)) {
+    const userRepo:Repository<userEntity> = getRepository(userEntity);
+    const user = await userRepo.findOne(id);
+    console.log(user);
+    console.log(!user);
+    console.log(typeof user === 'undefined');
+
+    if (!user) {
+      ctx.status = 404;
+    } else {
+      ctx.status = 200;
+      ctx.body = JSON.stringify(user);
+    }
+  } else {
+    ctx.status = 404;
+  }
+});
+
+router.delete('/:id', async (ctx:Koa.Context) => {
+  const id = ctx.params.id;
+
+  if (isUUID.anyNonNil(id)) {
+    const userRepo:Repository<userEntity> = getRepository(userEntity);
+    const user = await userRepo.findOne(id);
+    console.log(user);
+
+    if (!user) {
+      ctx.status = 404;
+    } else {
+      try {
+        await userRepo.delete(user);
+        ctx.status = 204;
+      } catch (e) {
+        console.log(e);
+        ctx.status = 500;
+      }
+    }
+  } else {
+    ctx.status = 404;
   }
 });
 
