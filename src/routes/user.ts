@@ -91,4 +91,9 @@ router.delete('/:id', async (ctx:Koa.Context) => {
   }
 });
 
+router.get('/ok', (ctx:Koa.Context) => {
+  ctx.status = 200;
+  ctx.body = 'ok';
+});
+
 export default router;
