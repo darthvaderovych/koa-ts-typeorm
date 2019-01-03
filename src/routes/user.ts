@@ -13,17 +13,21 @@ const router: Router = new Router(routerOpts);
 
 router.get('/', async (ctx:Koa.Context) => {
   const userRepo:Repository<userEntity> = getRepository(userEntity);
+  try {
+    const users = await userRepo.find();
+    ctx.body = JSON.stringify(users);
+  } catch (e) {
+    console.log(e);
+    ctx.status = 500;
+  }
 
-  const users = await userRepo.find();
-
-  ctx.body = JSON.stringify(users);
 });
 
 router.post('/', async (ctx:Koa.Context) => {
 
   if (ctx.request.type === 'application/json') {
     try {
-      const body = await helpers.validateBody(ctx.request.body);
+      const body = await helpers.validateUserData(ctx.request.body);
 
       if (!body) {
         return ctx.status = 400;
@@ -52,9 +56,6 @@ router.get('/:id', async (ctx:Koa.Context) => {
   if (isUUID.anyNonNil(id)) {
     const userRepo:Repository<userEntity> = getRepository(userEntity);
     const user = await userRepo.findOne(id);
-    console.log(user);
-    console.log(!user);
-    console.log(typeof user === 'undefined');
 
     if (!user) {
       ctx.status = 404;
@@ -73,7 +74,6 @@ router.delete('/:id', async (ctx:Koa.Context) => {
   if (isUUID.anyNonNil(id)) {
     const userRepo:Repository<userEntity> = getRepository(userEntity);
     const user = await userRepo.findOne(id);
-    console.log(user);
 
     if (!user) {
       ctx.status = 404;
@@ -89,11 +89,6 @@ router.delete('/:id', async (ctx:Koa.Context) => {
   } else {
     ctx.status = 404;
   }
-});
-
-router.get('/ok', (ctx:Koa.Context) => {
-  ctx.status = 200;
-  ctx.body = 'ok';
 });
 
 export default router;
