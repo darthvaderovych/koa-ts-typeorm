@@ -28,15 +28,23 @@ describe('API routes', () => {
   describe('GET user by id - /api/users/:id', () => {
     let savedUser: any;
 
-    before(async () => {
+    beforeEach(async () => {
       const user = await userRepo.create(config.user);
       savedUser = await userRepo.save(user);
     });
 
-    it('responds with status 200 and the user object', async () => {
+    it('responds with status 200 and the user object, if valid id', async () => {
       const response = await axios.get(`${host}/api/users/${savedUser.id}`);
       assert.strictEqual(response.status, 200);
       assert.deepEqual(response.data, savedUser);
+    });
+
+    it('responds with status 404, if ivalid id', async () => {
+      const wrongId = `${savedUser.id} + '1'`;
+      try {
+        const response = await axios.get(`${host}/api/users/${wrongId}`);
+        assert.strictEqual(response.status, 404);
+      } catch (e) {}
     });
 
     afterEach(async () => {
@@ -50,7 +58,7 @@ describe('API routes', () => {
   describe('DELETE user by id - /api/users/:id', () => {
     let savedUser;
 
-    before(async () => {
+    beforeEach(async () => {
       const user = await userRepo.create(config.user);
       savedUser = await userRepo.save(user);
     });
@@ -59,8 +67,15 @@ describe('API routes', () => {
       const response = await axios.delete(`${host}/api/users/${savedUser.id}`);
       assert.strictEqual(response.status, 204);
       const result = await userRepo.findOne(savedUser.id);
-      console.log(result);
       assert.isUndefined(result);
+    });
+
+    it('responds with status 404, if ivalid id', async () => {
+      const wrongId = `${savedUser.id} + '1'`;
+      try {
+        const response = await axios.delete(`${host}/api/users/${wrongId}`);
+        assert.strictEqual(response.status, 404);
+      } catch (e) {}
     });
 
     afterEach(async () => {
@@ -71,8 +86,8 @@ describe('API routes', () => {
     });
   });
 
-  describe('POST new user - /api/users/', () => {
-    let savedUser: any;
+  describe('POST valid user  data - /api/users/', () => {
+    let savedUser;
 
     it('responds with status 201 and the user object', async () => {
       const response = await axios.post(`${host}/api/users/`, config.user);
@@ -82,7 +97,7 @@ describe('API routes', () => {
 
     });
 
-    afterEach(async () => {
+    after(async () => {
       const user = await userRepo.findOne(savedUser.id);
       if (user) {
         await userRepo.remove(savedUser);
@@ -90,26 +105,18 @@ describe('API routes', () => {
     });
   });
 
-  describe('POST new user - /api/users/', () => {
-    let savedUser: any;
+  describe('POST invalid user data - /api/users/', () => {
 
-    it('responds with status 201 and the user object', async () => {
-      const response = await axios.post(`${host}/api/users/, config.user`);
-      savedUser = response.data;
-      assert.strictEqual(response.status, 201);
-      assert.deepEqual(response.data.username, config.user.username);
-
-    });
-
-    afterEach(async () => {
-      const user = await userRepo.findOne(savedUser.id);
-      if (user) {
-        await userRepo.remove(savedUser);
-      }
+    it('responds with status 400, if invalid user data', async () => {
+      try {
+        const response = await axios.post(`${host}/api/users/`, config.invalidUser);
+        assert.strictEqual(response.status, 400);
+      } catch (e) {}
+      // right way to handle 400 ?
     });
   });
 
-  describe('POST new user - /api/users/', () => {
+  describe('POST /api/users/ - authenticate user', () => {
     let savedUser: any;
 
     before(async () => {
@@ -122,6 +129,40 @@ describe('API routes', () => {
       const response = await axios.post(`${host}/api/authenticate/`, { username, password });
       assert.strictEqual(response.status, 200);
       assert.isObject(response.data);
+    });
+
+    after(async () => {
+      const user = await userRepo.findOne(savedUser.id);
+      if (user) {
+        await userRepo.remove(savedUser);
+      }
+    });
+  });
+
+  describe('POST invalid auth data - /api/authenticate/', () => {
+    let savedUser: any;
+
+    beforeEach(async () => {
+      const user = await userRepo.create(config.user);
+      savedUser = await userRepo.save(user);
+    });
+
+    it('responds with status 404, if no user found', async () => {
+      const { username, password } = savedUser;
+      const wrongPassword = `${password} + '1'`;
+      try {
+        const response = await axios.post(`${host}/api/authenticate/`, { username, wrongPassword });
+        assert.strictEqual(response.status, 404);
+      } catch (e) {}
+    });
+
+    it('responds with status 400, if invalid auth data', async () => {
+      const { username } = savedUser;
+      const wrongPassword = 'pass'; // "password" length must be at least 6 characters long'
+      try {
+        const response = await axios.post(`${host}/api/authenticate/`, { username, wrongPassword });
+        assert.strictEqual(response.status, 400);
+      } catch (e) {}
     });
 
     afterEach(async () => {
