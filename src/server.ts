@@ -1,9 +1,9 @@
 import app from './app/app';
-import dbConnection from './db/connection';
+import { createConnection } from 'typeorm';
 
 const PORT:number = Number(process.env.PORT) || 9000;
 
-dbConnection.then(() => {
+createConnection().then(async (connection) => {
   console.log('db connected');
   app.listen(PORT, () => console.log(`App is listening on port: ${PORT}`));
 

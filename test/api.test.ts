@@ -3,7 +3,6 @@ import { assert } from 'chai';
 import { Repository, createConnection } from 'typeorm';
 import User from '../src/db/entity/User';
 import config from  '../config/test';
-import dbOpts from '../config/db';
 
 describe('API routes', () => {
   const host = config.host;
@@ -11,7 +10,7 @@ describe('API routes', () => {
   let userRepo: Repository<User>;
 
   before(async () => {
-    connection = await createConnection(dbOpts);
+    connection = await createConnection();
     userRepo = connection.getRepository(User);
   });
 
@@ -27,7 +26,7 @@ describe('API routes', () => {
   });
 
   describe('GET user by id - /api/users/:id', () => {
-    let savedUser: any;
+    let savedUser:any;
 
     beforeEach(async () => {
       const user = await userRepo.create(config.user);
@@ -152,6 +151,7 @@ describe('API routes', () => {
       });
       assert.strictEqual(response.status, 200);
       assert.isObject(response.data);
+      assert.property(response.data, 'token');
     });
 
     after(async () => {
